@@ -5,94 +5,158 @@ import sys, os
 import unittest
 import helper
 
+def get_tb():
+    def _error():
+        try:
+            1 / 0
+        except Exception as e:
+            tb = e.__traceback__
+        return tb
+
+    tb = _error()
+    while tb.tb_next:
+        tb = tb.tb_next
+    return tb
+
+TRACEBACK_CODE = get_tb().tb_frame.f_code
+
+class _C:
+    def __init__(self, x):
+        self.x = x == 1
+
+    @staticmethod
+    def sm(x):
+        x = x == 1
+
+    @classmethod
+    def cm(cls, x):
+        cls.x = x == 1
+
+def _f(a):
+    print(a)
+    return 1
+
+def bug708901():
+    for res in range(1,
+                     10):
+        pass
+
+def bug1333982(x=[]):
+    assert 0, ([s for s in x] +
+              [1])
+    pass
+
+def bug42562():
+    None
+
+def stmt_str():
+    x = 5
+    x + 1
+    x = x + 1
+    x: int = 1
+    y: _f(1)
+    lst = [0]*5
+    lst[_f(0)]: int = 1
+    x = 0
+    while 1:
+        x += 1
+        # Insert if-break to stop execution while conserving jump absolute
+        if x > 5:
+            break
+    return x, lst[_f(0)]
+
+def _fstring(a, b, c, d):
+    return f'{a} {b:4} {c!r} {d!r:4}'
+
+def _tryfinally(a, b):
+    try:
+        return a
+    finally:
+        b()
+
+def _tryfinallyconst(b):
+    try:
+        return 1
+    finally:
+        b()
+
+def _tryfinallyreal(a, b):
+    try:
+        a
+    finally:
+        return b()
+
+def _g(x):
+    yield x
+
+async def _ag(x):
+    yield x
+
+async def _co(x):
+    async for item in _ag(x):
+        pass
+
+def _h(y):
+    def foo(x):
+        '''funcdoc'''
+        return [x + z for z in y]
+    return foo
+
+def load_test(x, y=0):
+    a, b = x, y
+    return a, b
+
+def loop_test():
+    for i in [1, 2, 3] * 3:
+        load_test(i)
+
+def extended_arg_quick():
+    *_, _ = ...
+
 class Test(helper.PickleTestDump):
-    def test_sequence_unpacking_error(self):
-        def func():
-            return (1, -1) or (-1, 1)
-        self.obj["f1"] = self.dumps(func)
+    def test_bug_708901(self):
+        self.obj["f"] = self.dumps(bug708901)
 
-    def test_import(self):
-        succeed = [
-            'import sys',
-            'import os, sys',
-            'import os as bar',
-            'import os.path as bar',
-            'from sys import stdin, stderr, stdout',
-            'from sys import (stdin, stderr,\nstdout)',
-            'from sys import (stdin, stderr,\nstdout,)',
-            'from sys import (stdin\n, stderr, stdout)',
-            'from sys import (stdin\n, stderr, stdout,)',
-            'from sys import stdin as si, stdout as so, stderr as se',
-            'from sys import (stdin as si, stdout as so, stderr as se)',
-            'from sys import (stdin as si, stdout as so, stderr as se,)',
-            ]
-        for idx, stmt in enumerate(succeed):
-            func_code = "def f():\n    " + stmt + "\n    return 1"
-            ld = {}
-            exec(func_code, globals(), ld)
-            func = ld["f"]
-            self.obj[str(idx)] = self.dumps(func)
+    def test_bug_1333982(self):
+        self.obj["f"] = self.dumps(bug1333982)
+        
+    def test_bug_42562(self):
+        self.obj["f"] = self.dumps(bug42562)
 
-    def test_subscripts(self):
-        class str_map(object):
-            def __init__(self):
-                self.data = {}
-            def __getitem__(self, key):
-                return self.data[str(key)]
-            def __setitem__(self, key, value):
-                self.data[str(key)] = value
-            def __delitem__(self, key):
-                del self.data[str(key)]
-            def __contains__(self, key):
-                return str(key) in self.data
-        self.obj["c"] = self.dumps(str_map)
+    def test_disassemble_str(self):
+        self.obj["f"] = self.dumps(stmt_str)
 
-    def test_single_statement(self):
-        def f1():
-            1+2
-        def f2():
-            1+2 # One plus two
-        def f3():
-            1;2
-        def f4():
-            import sys; sys
-        def f5():
-            pass
-        def f6():
-            while False:
-                pass
-        def d1(x):
-            pass
-        def d2(x):
-            pass
-        def f7(x=0):
-            if x:
-                d1(x)
-        def f8(x=0):
-            if x:
-                d1(x)
-            else:
-                d2(x)
-        class C:
-            pass
-        def f9():
-            c = '''
-                a=1
-                b=2
-                c=3
-                '''
-        self.obj["f1"] = self.dumps(f1)
-        self.obj["f2"] = self.dumps(f2)
-        self.obj["f3"] = self.dumps(f3)
-        self.obj["f4"] = self.dumps(f4)
-        self.obj["f5"] = self.dumps(f5)
-        self.obj["f6"] = self.dumps(f6)
-        self.obj["f7"] = self.dumps(f7)
-        self.obj["f8"] = self.dumps(f8)
-        self.obj["c"] = self.dumps(C)
-        self.obj["f9"] = self.dumps(f9)
+    def test_disassemble_bytes(self):
+        self.obj["f"] = self.dumps(_f)
 
+    def test_disassemble_class(self):
+        self.obj["C"] = self.dumps(_C)
 
+    def test_disassemble_instance_method(self):
+        self.obj["inst"] = self.dumps(_C.__init__)
+
+    def test_disassemble_static_method(self):
+        self.obj["sm"] = self.dumps(_C.sm)
+
+    def test_disassemble_class_method(self):
+        self.obj["cm"] = self.dumps(_C.cm)
+
+    def test_disassemble_generator(self):
+        self.obj["g"] = self.dumps(_g)
+
+    def test_disassemble_async_generator(self):
+        self.obj["ag"] = self.dumps(_ag)
+
+    def test_disassemble_coroutine(self):
+        self.obj["co"] = self.dumps(_co)
+
+    def test_disassemble_fstring(self):
+        self.obj["fstr"] = self.dumps(_fstring)
+
+    def test_disassemble_try_finally(self):
+        self.obj["ftf"] = self.dumps(_tryfinally)
+        self.obj["ftfc"] = self.dumps(_tryfinallyconst)
+        self.obj["ftfr"] = self.dumps(_tryfinallyreal)
 
 if __name__ == "__main__":
     unittest.main()
