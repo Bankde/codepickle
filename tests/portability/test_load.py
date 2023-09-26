@@ -21,26 +21,119 @@ def dummy_function(x=1):
     return x + 1
 
 class Test(helper.PickleTestLoad):
-    def test_bug_708901(self):
-        f = self.loads(self.obj["f"])
-        f()
 
-    def test_bug_1333982(self):
+    def test_arith_ops(self):
         f = self.loads(self.obj["f"])
-        with pytest.raises(Exception) as e_info:
-            f()
+        self.assertEqual(int(f(11)), 5)
 
-    def test_bug_42562(self):
+    def test_logical_ops(self):
         f = self.loads(self.obj["f"])
-        f()
+        self.assertTupleEqual(f(4), (False, True, False))
+        self.assertTupleEqual(f(3), (False, True, True))
 
-    def test_disassemble_str(self):
+    def test_comp_ops(self):
         f = self.loads(self.obj["f"])
-        self.assertEqual(f(), (6, 1))
-        
-    def test_disassemble_bytes(self):
+        self.assertTupleEqual(f(5), (True, False, False, False, True, True))
+
+    def test_identity_ops(self):
         f = self.loads(self.obj["f"])
-        self.assertEqual(f(3), 1)
+        self.assertTupleEqual(f(None), (True, False))
+
+    def test_member_ops(self):
+        f = self.loads(self.obj["f"])
+        self.assertTupleEqual(f(3,[3,4,5]), (True, False))
+
+    def test_bitwise_ops(self):
+        f = self.loads(self.obj["f"])
+        self.assertEqual(f(11), -16)
+
+    def test_dataType(self):
+        f = self.loads(self.obj["f"])
+        o = f()
+        self.assertEqual(o[0],"test")
+        self.assertEqual(o[1],5)
+        self.assertAlmostEqual(o[2],4.3)
+        self.assertEqual(o[3],complex(3,4))
+        self.assertTupleEqual(o[4:7], ([1,2,3],(1,2),range(4)))
+        self.assertDictEqual(o[7], {"a":3})
+        self.assertSetEqual(o[8], set([1,2,3]))
+        self.assertSetEqual(o[9], frozenset([1,2,3]))
+        self.assertTupleEqual(o[10:12], (True, False))
+        self.assertEqual(o[12], b'test')
+        self.assertEqual(o[13], bytearray(b'test'))
+        self.assertEqual(o[14].tobytes(), b'test')
+        self.assertEqual(o[15], None)
+
+    def test_typeCast(self):
+        f = self.loads(self.obj["f"])
+        o = f(3.4)
+        self.assertEqual(o[0], 3)
+        self.assertAlmostEqual(o[1], 3.4)
+        self.assertEqual(o[2], '3.4')
+
+    def test_list_ops(self):
+        f = self.loads(self.obj["f"])
+        self.assertTupleEqual(f([1,2,3,4]),
+            ([5, 4, 3], [1, 5, 4, 3, 3, 2, 1, 1, 2, 3], [5, 5, 5, 5], 1, 4, 4, [2]))
+
+    def test_tuple_ops(self):
+        f = self.loads(self.obj["f"])
+        self.assertTupleEqual(f((1,2,3,4)),
+            ((1, 2, 3, 4), (1, 2, 3, 4), 1, 4, 4, (2,), 1, 2, 3))
+
+    def test_set_ops(self):
+        f = self.loads(self.obj["f"])
+        self.assertEqual(f(set([1,2,3,4])),
+            ({1, 2, 3, 4}, True, True, 5, 1, {4}, {1, 2, 3}, False, {4}, {1, 2, 3, 4}))
+
+    def test_dict_ops(self):
+        f = self.loads(self.obj["f"])
+        d = {"a":10, "b":9, "c":8}
+        o = f(d)
+        self.assertDictEqual(o[0], {'a': 10, 'b': 12, 'c': 8, 'x': {'xx': 13}})
+        self.assertTupleEqual(o[1:3], (10, 10))
+        self.assertListEqual(list(o[3]), list(['a', 'b', 'c', 'x']))
+        # Ignore o[4] since it may be random.
+
+    def test_loop(self):
+        f = self.loads(self.obj["f"])
+        self.assertEqual(f(10), 30)
+
+    def test_condition(self):
+        f = self.loads(self.obj["f"])
+        self.assertEqual(f(5), -11)
+
+    def test_func(self):
+        f1 = self.loads(self.obj["f1"])
+        self.assertEqual(f1(5), 14)
+        f2 = self.loads(self.obj["f2"])
+        f2_f = f2(5)
+        self.assertEqual(f2_f(), 10)
+        f3 = self.loads(self.obj["f3"])
+        # No need to check result for f3
+        self.assertIsNone(f3("a","b",c="c",d="d"))
+        f4 = self.loads(self.obj["f4"])
+        self.assertEqual(f4(5), 15)
+
+    def test_lambda(self):
+        f = self.loads(self.obj["f"])
+        self.assertEqual(f(5), 54)
+
+    def test_import(self):
+        f1 = self.loads(self.obj["f1"])
+        # Lazy to check result of external modules
+        self.assertIsNotNone(f1())
+        f2 = self.loads(self.obj["f2"])
+        self.assertIsNotNone(f2())
+        f3 = self.loads(self.obj["f3"])
+        self.assertIsNotNone(f3())
+        f4 = self.loads(self.obj["f4"])
+        self.assertIsNotNone(f4())
+
+    def test_context(self):
+        f = self.loads(self.obj["f"])
+        from decimal import Decimal
+        self.assertEqual(f(), Decimal('0.0238095238095238095238095238095238095238095'))
 
     def test_disassemble_class(self):
         C = self.loads(self.obj["C"])
