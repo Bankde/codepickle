@@ -5,6 +5,18 @@ import sys, os
 import unittest
 import helper
 
+def dummy(i):
+    return i
+
+def dummy_kw(x=2):
+    return x
+
+def dummy_arg(*args):
+    return args
+
+def dummy_kwargs(**kwargs):
+    return kwargs
+
 def arithmetic_ops(i):
     j = 3
     j = 4+2
@@ -351,29 +363,43 @@ def inplace_true_divide(y):
     x = [17]
     x[0] /= y
 
-def getlen():
+def getlen(a):
     # GET_LEN
-    pass
+    match a:
+        case len([1,2,3]): 
+            return 1
 
-def match_mapping():
+def match_mapping(a):
     # MATCH_MAPPING
-    pass
+    match a:
+        case {"A":"B"}: 
+            return 1
 
-def match_sequence():
+def match_sequence(a):
     # MATCH_SEQUENCE
-    pass
+    match a:
+        case [1,2,3]: 
+            return 1
 
-def match_keys():
+def match_keys(a):
     # MATCH_KEYS
-    pass
+    match a:
+        case {"A":"B"}:
+            return 1
 
-def copy_dict_without_keys():
+def copy_dict_without_keys(a, b):
     # COPY_DICT_WITHOUT_KEYS
-    pass
+    match a:
+        case {"A":"B", **b}:
+            return 1
 
 def push_exc_info():
     # PUSH_EXC_INFO
-    pass
+    from decimal import Decimal, localcontext
+    with localcontext() as ctx:
+        ctx.prec = 42
+        x = Decimal("1") / Decimal("42")
+    return x
 
 def check_exc_match():
     # CHECK_EXC_MATCH
@@ -385,11 +411,19 @@ def check_eg_match():
 
 def reraise():
     # RERAISE
-    pass
+    from decimal import Decimal, localcontext
+    with localcontext() as ctx:
+        ctx.prec = 42
+        x = Decimal("1") / Decimal("42")
+    return x
 
 def with_except_start():
     # WITH_EXCEPT_START
-    pass
+    from decimal import Decimal, localcontext
+    with localcontext() as ctx:
+        ctx.prec = 42
+        x = Decimal("1") / Decimal("42")
+    return x
 
 def begin_finally():
     # BEGIN_FINALLY
@@ -397,62 +431,103 @@ def begin_finally():
 
 def before_with():
     # BEFORE_WITH
-    pass
+    from decimal import Decimal, localcontext
+    with localcontext() as ctx:
+        ctx.prec = 42
+        x = Decimal("1") / Decimal("42")
+    return x
 
-def end_async_for():
+async def end_async_for():
     # END_ASYNC_FOR
-    pass
+    a = 0
+    async for i in range(10):
+        a += i
+    return a
 
-def inplace_add():
+def inplace_add(y):
     # INPLACE_ADD
-    pass
+    x = [17]
+    x[0] += y
+    return x[0]
 
-def inplace_sub():
+def inplace_sub(y):
     # INPLACE_SUBTRACT
-    pass
+    x = [17]
+    x[0] -= y
+    return x[0]
 
-def inplace_mul():
+def inplace_mul(y):
     # INPLACE_MULTIPLY
-    pass
+    x = [17]
+    x[0] *= y
+    return x[0]
 
-def inplace_mod():
+def inplace_mod(y):
     # INPLACE_MODULO
-    pass
+    x = [17]
+    x[0] %= y
+    return x[0]
 
-def bin_lshift():
+def bin_lshift(x,y):
     # BINARY_LSHIFT
-    pass
+    a = bin(x)
+    b = bin(y)
+    return a << b
 
-def bin_rshift():
+def bin_rshift(x,y):
     # BINARY_RSHIFT
-    pass
+    a = bin(x)
+    b = bin(y)
+    return a >> b
 
-def bin_and():
+def bin_and(x,y):
     # BINARY_AND
-    pass
+    a = bin(x)
+    b = bin(y)
+    return a & b
 
-def bin_xor():
+def bin_xor(x,y):
     # BINARY_XOR
-    pass
+    a = bin(x)
+    b = bin(y)
+    return a ^ b
 
-def bin_or():
+def bin_or(x,y):
     # BINARY_OR
-    pass
+    a = bin(x)
+    b = bin(y)
+    return a | b
 
-def inplace_pow():
+def inplace_pow(y):
     # INPLACE_POWER
-    pass
+    x = [17]
+    x[0] **= y
+    return x[0]
 
-def yield_from():
+def reader():
+    for i in range(4):
+        yield i
+
+def yield_from(g):
     # YIELD_FROM
-    pass
+    yield from g
 
-def get_awaitable():
+'''
+wrap = yield_from(reader())
+for i in wrap:
+    print(i) # 1 to 4
+'''
+
+async def afunc(x):
+    return x
+
+async def get_awaitable(x):
     # GET_AWAITABLE
-    pass
+    x = await afunc(x)
 
-def load_assert_err():
+def load_assert_err(x):
     # LOAD_ASSERTION_ERROR
+    assert 0, ((s for s in x) + 1)
     pass
 
 def inplace_lshift(y):
@@ -461,9 +536,12 @@ def inplace_lshift(y):
     x[0] <<= y
     return x[0]
 
-def return_generator():
+async def return_generator():
     # RETURN_GENERATOR
-    pass
+    a = 0
+    async for i in range(10):
+        a += i
+    return a
 
 def inplace_rshift(y):
     # INPLACE_RSHIFT
@@ -524,9 +602,9 @@ def pop_block():
         x = Decimal("1") / Decimal("42")
     return x
 
-def async_gen_wrap():
+async def async_gen_wrap():
     # ASYNC_GEN_WRAP
-    pass
+    yield 1
 
 def end_finally():
     # END_FINALLY
@@ -538,169 +616,257 @@ def end_finally():
 
 def prep_reraise_star():
     # PREP_RERAISE_STAR
-    pass
+    try:
+        pass
+    except* Exception:
+        pass
 
 def rot_n():
     # ROT_N
-    pass
+    assert(0)
 
 def swap():
     # SWAP
-    pass
+    assert(0)
 
 def jump_abs():
     # JUMP_ABSOLUTE
-    pass
+    for i in range(5):
+        continue
+    return i
 
-def pop_jump_if_else():
+def pop_jump_if_false(i):
     # POP_JUMP_IF_FALSE
-    pass
+    if i == 0:
+        return 0
+    return pop_jump_if_false(i-1) + i
 
-def pop_jump_forward_if_else():
+def pop_jump_forward_if_else(i):
     # POP_JUMP_FORWARD_IF_FALSE
-    pass
+    if i == 0:
+        return 0
+    return pop_jump_forward_if_else(i-1) + i
 
-def pop_jump_if_true():
+def pop_jump_if_true(i):
     # POP_JUMP_IF_TRUE
-    pass
+    if not i == 0:
+        return 0
+    return pop_jump_if_true(i-1) + i
 
-def pop_jump_forward_if_true():
+def pop_jump_forward_if_true(i):
     # POP_JUMP_FORWARD_IF_TRUE
-    pass
+    if not i == 0:
+        return 0
+    return pop_jump_forward_if_true(i-1) + i
 
-def is_op():
+def is_op(x,y):
     # IS_OP
-    pass
+    return x is y
 
-def contain_op():
+def contain_op(x,y):
     # CONTAINS_OP
-    pass
+    return x in y
 
 def continue_loop():
     # CONTINUE_LOOP
-    pass
+    x = 0
+    for i in range(5):
+        try:
+            1/0
+        except:
+            continue
+        finally:
+            x += 1
+    return x
 
 # RERAISE dup with OP_48
 
 def setup_loop():
     # SETUP_LOOP
-    pass
+    x = 0
+    for i in range(3):
+        x += i
+    return x
 
-def copy():
+def copy(b):
     # COPY
-    pass
+    try:
+        return 1
+    finally:
+        b()
 
 def setup_except():
     # SETUP_EXCEPT
-    pass
+    try:
+        1/0
+    except:
+        x = 5
+    return x
 
 def jump_if_not_exc_match():
     # JUMP_IF_NOT_EXC_MATCH
-    pass
+    try:
+        1/0
+    except Exception as e:
+        tb = e.__traceback__
+    return tb
 
 def setup_finally():
     # SETUP_FINALLY
-    pass
+    try:
+        1/0
+    except:
+        return 5
 
-def bin_op():
+def bin_op(i):
     # BINARY_OP
-    pass
+    if i == 0:
+        return 0
+    return bin_op(i-1) + i
 
-def send():
+def send(g):
     # SEND
-    pass
+    # Check compile.c, this op is probably exactly same as 'YIELD_FROM'
+    yield from g
 
-def pop_jump_forward_if_not_none():
+def pop_jump_forward_if_not_none(x):
     # POP_JUMP_FORWARD_IF_NOT_NONE
-    pass
+    if x is None:
+        return 1
+    return 2
 
-def pop_jump_forward_if_none():
+def gen_start():
+    # GEN_START
+    yield 1
+
+def pop_jump_forward_if_none(x):
     # POP_JUMP_FORWARD_IF_NONE
-    pass
+    if not x is None:
+        return 1
+    return 2
 
 def call_func():
     # CALL_FUNCTION
-    pass
+    return dummy(5)
 
 # GET_AWAITABLE - already declared in OP_73
 
-def jump_backward_no_interrupt():
+async def jump_backward_no_interrupt(i):
     # JUMP_BACKWARD_NO_INTERRUPT
-    pass
+    if i == 0:
+        return i
+    return await jump_backward_no_interrupt(i-1)
 
-def load_closure():
+def load_closure(x):
     # LOAD_CLOSURE
-    pass
+    # pickle.dumps(load_closure)
+    def test2(y):
+        return x+y
+    return test2
 
-def make_cell():
+def make_cell(x):
     # MAKE_CELL
-    pass
+    # pickle.dumps(make_cell)
+    def test2(y):
+        return x+y
+    return test2
 
 # The OP_num shift by 1 number for 3.11
 
-def load_deref():
+def load_deref(x):
     # LOAD_DEREF
-    pass
+    # pickle.dumps(load_deref(5))
+    def test2(y):
+        return x+y
+    return test2
 
-def store_deref():
+def store_deref(x):
     # STORE_DEREF
-    pass
+    # pickle.dumps(store_deref(5))
+    def test2(y):
+        nonlocal x
+        x = y
+        return x
+    return test2
 
-def delete_deref():
+def delete_deref(x):
     # DELETE_DEREF
-    pass
+    # pickle.dumps(store_deref(5))
+    def test2(y):
+        nonlocal x
+        del x
+    return test2
 
 def jump_backward():
     # JUMP_BACKWARD
-    pass
+    for i in range(1,10):
+        pass
+    return i
 
 def call_func_kw():
     # CALL_FUNCTION_KW
-    pass
+    return dummy_kw(x=5)
 
 def setup_with():
     # SETUP_WITH
-    pass
+    from decimal import Decimal, localcontext
+    with localcontext() as ctx:
+        ctx.prec = 42
+        x = Decimal("1") / Decimal("42")
+    return x
 
-def build_list_unpack():
+def build_list_unpack(*args):
     # BUILD_LIST_UNPACK
-    pass
+    x = [*args]
+    return x
 
-def copy_free_vars():
+def copy_free_vars(y):
     # COPY_FREE_VARS
-    pass
+    # pickle.dumps(copy_free_vars(5))
+    def foo(x):
+        '''funcdoc'''
+        return [x + z for z in y]
+    return foo
 
-def build_map_unpack():
+def build_map_unpack(**kwargs):
     # BUILD_MAP_UNPACK
-    pass
+    x = {**kwargs}
+    return x
 
-def build_map_unpack_with_call():
+def build_map_unpack_with_call(a, b):
     # BUILD_MAP_UNPACK_WITH_CALL
-    pass
+    return dummy_kwargs(**a, **b)
 
 def resume():
     # RESUME
-    pass
+    return 1
 
-def build_tuple_unpack():
+def build_tuple_unpack(a, b):
     # BUILD_TUPLE_UNPACK
-    pass
+    return dummy_arg(*a, *b)
 
-def match_class():
+def match_class(typ):
     # MATCH_CLASS
-    pass
+    match typ():
+        case object():
+            return 1
+    return 5
 
-def build_set_unpack():
+def build_set_unpack(x,y):
     # BUILD_SET_UNPACK
-    pass
+    return dummy_arg({*x, *y})
 
-def setup_async_with():
+async def setup_async_with():
     # SETUP_ASYNC_WITH
-    pass
+    from decimal import Decimal, localcontext
+    async with localcontext() as ctx:
+        ctx.prec = 42
+        x = Decimal("1") / Decimal("42")
+    return x
 
-def build_tuple_unpack_with_call():
+def build_tuple_unpack_with_call(x,y):
     # BUILD_TUPLE_UNPACK_WITH_CALL
-    pass
+    return dummy_arg(*x, *y)
 
 def call_method():
     # CALL_METHOD
@@ -730,13 +896,17 @@ def dict_update():
     # DICT_UPDATE
     pass
 
-def precall():
+def precall(i):
     # PRECALL
-    pass
+    if i == 0:
+        return 0
+    return precall(i-1) + i
 
-def call():
+def call(i):
     # CALL
-    pass
+    if i == 0:
+        return 0
+    return call(i-1) + i
 
 def kw_names():
     # KW_NAMES
@@ -867,8 +1037,6 @@ class Test(helper.PickleTestDump):
         self.obj["binmatmul"] = self.dumps(bin_matmul)
         self.obj["binpow"] = self.dumps(bin_pow)
         self.obj["binmul"] = self.dumps(bin_mul)
-        self.obj["binpow"] = self.dumps(bin_pow)
-        self.obj["binmul"] = self.dumps(bin_mul)
         self.obj["binmod"] = self.dumps(bin_mod)
         self.obj["binadd"] = self.dumps(bin_add)
         self.obj["binsub"] = self.dumps(bin_sub)
@@ -986,6 +1154,9 @@ class Test(helper.PickleTestDump):
 
     def test_op_send(self):
         self.obj["f"] = self.dumps(send)
+
+    def test_op_gen_start(self):
+        self.obj["f"] = self.dumps(gen_start)
 
     def test_op_call(self):
         self.obj["call_func"] = self.dumps(call_func)
