@@ -4,6 +4,7 @@
 import sys, os
 import unittest
 import helper
+import pytest
 
 def dummy(i):
     return i
@@ -1050,6 +1051,7 @@ class Test(helper.PickleTestDump):
     def test_disassemble_generator(self):
         self.obj["g"] = self.dumps(gen)
 
+    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
     def test_disassemble_async_generator(self):
         self.obj["ag"] = self.dumps(async_gen)
 
@@ -1110,10 +1112,9 @@ class Test(helper.PickleTestDump):
         self.obj["inplace_xor"] = self.dumps(inplace_xor)
         self.obj["inplace_or"] = self.dumps(inplace_or)
 
-    def test_op_getlen(self):
-        self.obj["getlen"] = self.dumps(getlen)
-
+    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
     def test_op_match(self):
+        self.obj["getlen"] = self.dumps(getlen)
         self.obj["match_mapping"] = self.dumps(match_mapping)
         self.obj["match_sequence"] = self.dumps(match_sequence)
         self.obj["match_keys"] = self.dumps(match_keys)
@@ -1125,13 +1126,17 @@ class Test(helper.PickleTestDump):
     def test_op_except(self):
         self.obj["push_exc_info"] = self.dumps(push_exc_info)
         self.obj["check_exc_match"] = self.dumps(check_exc_match)
-        self.obj["check_eg_match"] = self.dumps(check_eg_match)
 
     def test_op_context_except(self):
         self.obj["reraise"] = self.dumps(reraise)
         self.obj["with_except_start"] = self.dumps(with_except_start)
-        self.obj["prep_reraise_star"] = self.dumps(prep_reraise_star)
         self.obj["setup_except"] = self.dumps(setup_except)
+
+    @pytest.mark.skipif(sys.version_info < (3,11), reason="requires python3.11")
+    def test_op_context_except_star(self):
+        self.obj["check_eg_match"] = self.dumps(check_eg_match)
+        self.obj["prep_reraise_star"] = self.dumps(prep_reraise_star)
+        self.obj["swap"] = self.dumps(swap)
 
     def test_op_context_async(self):
         self.obj["end_async_for"] = self.dumps(end_async_for)
@@ -1172,14 +1177,13 @@ class Test(helper.PickleTestDump):
     def test_op_pop_block(self):
         self.obj["pop_block"] = self.dumps(pop_block)
 
+    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
     def test_op_async_gen_wrap(self):
         self.obj["async_gen_wrap"] = self.dumps(async_gen_wrap)
 
+    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
     def test_op_rotN(self):
         self.obj["rot_n"] = self.dumps(rot_n)
-
-    def test_op_swap(self):
-        self.obj["swap"] = self.dumps(swap)
 
     def test_op_jump(self):
         self.obj["jump_abs"] = self.dumps(jump_abs)
