@@ -17,6 +17,21 @@ def dummy_arg(*args):
 def dummy_kwargs(**kwargs):
     return kwargs
 
+async def arange(count):
+    # For ASYNC_FOR
+    for i in range(count):
+        yield(i)
+
+async def afunc(x):
+    return x
+
+class AsyncContextManager:
+    # For ASYNC_WITH
+    async def __aenter__(self):
+        pass
+    async def __aexit__(self, exc_type, exc, tb):
+        pass
+
 def arithmetic_ops(i):
     j = 3
     j = 4+2
@@ -121,7 +136,7 @@ def set_ops(s):
     d = s2.pop()
     s2.clear()
     del s2
-    s3 = set([1,2,3])
+    s3 = {1,2,3}
     e = s.difference(s3)
     f = s.intersection(s3)
     g = s.issubset(s3)
@@ -220,9 +235,9 @@ def func_with_import_4():
 def func_with_context():
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 class TClass:
     def __init__(self, x):
@@ -301,56 +316,51 @@ def dupTopTwo():
     # DUP_TOP_TWO
     a = [1,[2,3]]
     a[1] += [4]
+    return a
 
 def bin_matmul():
     # BINARY_MATRIX_MULTIPLY
-    pass
+    import numpy as np
+    a = np.array([[1,2],[3,4]])
+    b = np.array([[2,3],[4,5]])
+    a = b @ a
+    return a
 
 def inplace_matmul():
     # INPLACE_MATRIX_MULTIPLY
-    pass
+    import numpy as np
+    a = np.array([[1,2],[3,4]])
+    b = np.array([[2,3],[4,5]])
+    a @= b
+    return a
 
 def bin_pow(x,y):
     # BINARY_POWER
-    a = bin(x)
-    b = bin(y)
-    return a**b
+    return x**y
 
 def bin_mul(x,y):
     # BINARY_MULTIPLY
-    a = bin(x)
-    b = bin(y)
-    return a*b
+    return x*y
 
 def bin_mod(x,y):
     # BINARY_MODULO
-    a = bin(x)
-    b = bin(y)
-    return a % b
+    return x%y
 
 def bin_add(x,y):
     # BINARY_ADD
-    a = bin(x)
-    b = bin(y)
-    return a + b
+    return x+y
 
 def bin_sub(x,y):
     # BINARY_SUBTRACT
-    a = bin(x)
-    b = bin(y)
-    return a - b
+    return x-y
 
 def bin_floordivide(x,y):
     # BINARY_FLOOR_DIVIDE
-    a = bin(x)
-    b = bin(y)
-    return a // b
+    return x//y
 
 def bin_truedivide(x,y):
     # BINARY_TRUE_DIVIDE
-    a = bin(x)
-    b = bin(y)
-    return a / b
+    return x/y
 
 def inplace_floor_divide(y):
     # INPLACE_FLOOR_DIVIDE
@@ -362,11 +372,12 @@ def inplace_true_divide(y):
     # INPLACE_TRUE_DIVIDE
     x = [17]
     x[0] /= y
+    return x[0]
 
 def getlen(a):
     # GET_LEN
     match a:
-        case len([1,2,3]): 
+        case [1,2,3]: 
             return 1
 
 def match_mapping(a):
@@ -395,52 +406,68 @@ def copy_dict_without_keys(a, b):
 
 def push_exc_info():
     # PUSH_EXC_INFO
-    from decimal import Decimal, localcontext
-    with localcontext() as ctx:
-        ctx.prec = 42
-        x = Decimal("1") / Decimal("42")
-    return x
+    try:
+        1/0
+    except Exception as e:
+        return 1
+    return 5
 
 def check_exc_match():
     # CHECK_EXC_MATCH
-    pass
+    try:
+        1/0
+    except Exception as e:
+        return 1
+    return 5
 
 def check_eg_match():
     # CHECK_EG_MATCH
-    pass
+    try:
+        1/0
+        a = 5
+    except* Exception as e:
+        a = 1
+    return a
 
 def reraise():
     # RERAISE
-    from decimal import Decimal, localcontext
-    with localcontext() as ctx:
-        ctx.prec = 42
-        x = Decimal("1") / Decimal("42")
-    return x
+    try:
+        1/0
+    except Exception as e:
+        return 1
+    return 5
 
 def with_except_start():
     # WITH_EXCEPT_START
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 def begin_finally():
     # BEGIN_FINALLY
-    pass
+    try:
+        1/0
+        a = 2
+    except:
+        a = 5
+    finally:
+        a = 3
+    return a
 
 def before_with():
     # BEFORE_WITH
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 async def end_async_for():
     # END_ASYNC_FOR
     a = 0
-    async for i in range(10):
+    async for i in arange(10):
         a += i
     return a
 
@@ -470,33 +497,23 @@ def inplace_mod(y):
 
 def bin_lshift(x,y):
     # BINARY_LSHIFT
-    a = bin(x)
-    b = bin(y)
-    return a << b
+    return x<<y
 
 def bin_rshift(x,y):
     # BINARY_RSHIFT
-    a = bin(x)
-    b = bin(y)
-    return a >> b
+    return x>>y
 
 def bin_and(x,y):
     # BINARY_AND
-    a = bin(x)
-    b = bin(y)
-    return a & b
+    return x&y
 
 def bin_xor(x,y):
     # BINARY_XOR
-    a = bin(x)
-    b = bin(y)
-    return a ^ b
+    return x^y
 
 def bin_or(x,y):
     # BINARY_OR
-    a = bin(x)
-    b = bin(y)
-    return a | b
+    return x|y
 
 def inplace_pow(y):
     # INPLACE_POWER
@@ -504,31 +521,28 @@ def inplace_pow(y):
     x[0] **= y
     return x[0]
 
-def reader():
-    for i in range(4):
-        yield i
-
 def yield_from(g):
     # YIELD_FROM
     yield from g
 
 '''
+def reader():
+    for i in range(4):
+        yield i
 wrap = yield_from(reader())
 for i in wrap:
-    print(i) # 1 to 4
+    print(i) # 0 to 3
 '''
-
-async def afunc(x):
-    return x
 
 async def get_awaitable(x):
     # GET_AWAITABLE
     x = await afunc(x)
+    return x
 
 def load_assert_err(x):
     # LOAD_ASSERTION_ERROR
-    assert 0, ((s for s in x) + 1)
-    pass
+    assert 0 == x
+    return 1
 
 def inplace_lshift(y):
     # INPLACE_LSHIFT
@@ -539,7 +553,7 @@ def inplace_lshift(y):
 async def return_generator():
     # RETURN_GENERATOR
     a = 0
-    async for i in range(10):
+    async for i in arange(10):
         a += i
     return a
 
@@ -572,22 +586,23 @@ def break_loop(x):
     while True:
         if x:
             break
+    return 1
 
 def with_cleanup_start():
     # WITH_CLEANUP_START
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 def with_cleanup_finish():
     # WITH_CLEANUP_FINISH
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 def list_to_tuple():
     # LIST_TO_TUPLE
@@ -598,9 +613,9 @@ def pop_block():
     # POP_BLOCK
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 async def async_gen_wrap():
     # ASYNC_GEN_WRAP
@@ -610,24 +625,36 @@ def end_finally():
     # END_FINALLY
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 def prep_reraise_star():
     # PREP_RERAISE_STAR
     try:
-        pass
+        1/0
+        a = 5
     except* Exception:
-        pass
+        a = 1
+    return a
 
 def rot_n():
     # ROT_N
-    assert(0)
+    x = {"y": 1}
+    z = 1
+    match x:
+        case {"y": (0 as y) | (1 as y)}:
+            z = 0
+    return z
 
 def swap():
     # SWAP
-    assert(0)
+    try:
+        1/0
+        a = 2
+    except* Exception as e:
+        a = 5
+    return a
 
 def jump_abs():
     # JUMP_ABSOLUTE
@@ -641,11 +668,11 @@ def pop_jump_if_false(i):
         return 0
     return pop_jump_if_false(i-1) + i
 
-def pop_jump_forward_if_else(i):
+def pop_jump_forward_if_false(i):
     # POP_JUMP_FORWARD_IF_FALSE
     if i == 0:
         return 0
-    return pop_jump_forward_if_else(i-1) + i
+    return pop_jump_forward_if_false(i-1) + i
 
 def pop_jump_if_true(i):
     # POP_JUMP_IF_TRUE
@@ -699,9 +726,10 @@ def setup_except():
     # SETUP_EXCEPT
     try:
         1/0
+        a = 5
     except:
-        x = 5
-    return x
+        a = 1
+    return a
 
 def jump_if_not_exc_match():
     # JUMP_IF_NOT_EXC_MATCH
@@ -709,7 +737,7 @@ def jump_if_not_exc_match():
         1/0
     except Exception as e:
         tb = e.__traceback__
-    return tb
+    return 1
 
 def setup_finally():
     # SETUP_FINALLY
@@ -795,6 +823,7 @@ def delete_deref(x):
     def test2(y):
         nonlocal x
         del x
+        return y
     return test2
 
 def jump_backward():
@@ -811,9 +840,9 @@ def setup_with():
     # SETUP_WITH
     from decimal import Decimal, localcontext
     with localcontext() as ctx:
-        ctx.prec = 42
+        ctx.prec = 10
         x = Decimal("1") / Decimal("42")
-    return x
+    return str(x)
 
 def build_list_unpack(*args):
     # BUILD_LIST_UNPACK
@@ -822,7 +851,7 @@ def build_list_unpack(*args):
 
 def copy_free_vars(y):
     # COPY_FREE_VARS
-    # pickle.dumps(copy_free_vars(5))
+    # pickle.dumps(copy_free_vars([1,2,3]))
     def foo(x):
         '''funcdoc'''
         return [x + z for z in y]
@@ -843,7 +872,7 @@ def resume():
 
 def build_tuple_unpack(a, b):
     # BUILD_TUPLE_UNPACK
-    return dummy_arg(*a, *b)
+    return (*a, *b)
 
 def match_class(typ):
     # MATCH_CLASS
@@ -854,47 +883,55 @@ def match_class(typ):
 
 def build_set_unpack(x,y):
     # BUILD_SET_UNPACK
-    return dummy_arg({*x, *y})
+    return {*x, *y}
 
 async def setup_async_with():
     # SETUP_ASYNC_WITH
-    from decimal import Decimal, localcontext
-    async with localcontext() as ctx:
-        ctx.prec = 42
-        x = Decimal("1") / Decimal("42")
+    async with AsyncContextManager() as ctx:
+        x = 1
     return x
 
 def build_tuple_unpack_with_call(x,y):
     # BUILD_TUPLE_UNPACK_WITH_CALL
     return dummy_arg(*x, *y)
 
-def call_method():
+def call_method(x):
     # CALL_METHOD
-    pass
+    return x.upper()
 
 def call_finally():
     # CALL_FINALLY
-    pass
+    try:
+        1/0
+    except:
+        return 2
+    finally:
+        return 5
 
 def list_extend():
     # LIST_EXTEND
-    pass
+    return [1,2,3]
 
 def pop_finally():
     # POP_FINALLY
-    pass
+    try:
+        1/0
+    except:
+        return 2
+    finally:
+        return 5
 
 def set_update():
     # SET_UPDATE
-    pass
+    return {1,2,3}
 
-def dict_merge():
+def dict_merge(a, b):
     # DICT_MERGE
-    pass
+    return dummy_kwargs(**a, **b)
 
-def dict_update():
+def dict_update(a, b):
     # DICT_UPDATE
-    pass
+    return {**a, **b}
 
 def precall(i):
     # PRECALL
@@ -910,23 +947,31 @@ def call(i):
 
 def kw_names():
     # KW_NAMES
-    pass
+    return dummy_kwargs(a="b")
 
-def pop_jump_backward_if_not_none():
+def pop_jump_backward_if_not_none(a):
     # POP_JUMP_BACKWARD_IF_NOT_NONE
-    pass
+    while not a is None:
+        a = None
+    return 3
 
-def pop_jump_backward_if_none():
+def pop_jump_backward_if_none(a):
     # POP_JUMP_BACKWARD_IF_NONE
-    pass
+    while a is None:
+        a = 4
+    return 3
 
-def pop_jump_backward_if_false():
+def pop_jump_backward_if_false(a):
     # POP_JUMP_BACKWARD_IF_FALSE
-    pass
+    while not a:
+        a = True
+    return 3
 
-def pop_jump_backward_if_true():
+def pop_jump_backward_if_true(a):
     # POP_JUMP_BACKWARD_IF_TRUE
-    pass
+    while a:
+        a = False
+    return 3
 
 class Test(helper.PickleTestDump):
 
@@ -1021,32 +1066,34 @@ class Test(helper.PickleTestDump):
 
     def test_closure(self):
         self.obj["f"] = self.dumps(closure)
-        c = closure(10)
+        c = closure([1,2,3])
         self.obj["c"] = self.dumps(c)
 
     def test_op_rot(self):
+        '''
+        Not include ROT_N and SWAP here because those OPs
+        are not really for direct stacks swapping
+        '''
         self.obj["rot"] = self.dumps(rotTwoThree)
-        self.obj["rotN"] = self.dumps(rot_n)
-        self.obj["swap"] = self.dumps(swap)
 
     def test_op_dup(self):
         self.obj["dupTop"] = self.dumps(dup)
         self.obj["dupTopTwo"] = self.dumps(dupTopTwo)
 
     def test_op_bin(self):
-        self.obj["binmatmul"] = self.dumps(bin_matmul)
-        self.obj["binpow"] = self.dumps(bin_pow)
-        self.obj["binmul"] = self.dumps(bin_mul)
-        self.obj["binmod"] = self.dumps(bin_mod)
-        self.obj["binadd"] = self.dumps(bin_add)
-        self.obj["binsub"] = self.dumps(bin_sub)
-        self.obj["binfloordivide"] = self.dumps(bin_floordivide)
-        self.obj["bintruedivide"] = self.dumps(bin_truedivide)
-        self.obj["binlshift"] = self.dumps(bin_lshift)
-        self.obj["binrfshift"] = self.dumps(bin_rshift)
-        self.obj["binand"] = self.dumps(bin_and)
-        self.obj["binxor"] = self.dumps(bin_xor)
-        self.obj["binor"] = self.dumps(bin_or)
+        self.obj["bin_matmul"] = self.dumps(bin_matmul)
+        self.obj["bin_pow"] = self.dumps(bin_pow)
+        self.obj["bin_mul"] = self.dumps(bin_mul)
+        self.obj["bin_mod"] = self.dumps(bin_mod)
+        self.obj["bin_add"] = self.dumps(bin_add)
+        self.obj["bin_sub"] = self.dumps(bin_sub)
+        self.obj["bin_floordivide"] = self.dumps(bin_floordivide)
+        self.obj["bin_truedivide"] = self.dumps(bin_truedivide)
+        self.obj["bin_lshift"] = self.dumps(bin_lshift)
+        self.obj["bin_rshift"] = self.dumps(bin_rshift)
+        self.obj["bin_and"] = self.dumps(bin_and)
+        self.obj["bin_xor"] = self.dumps(bin_xor)
+        self.obj["bin_or"] = self.dumps(bin_or)
 
     def test_op_inplace(self):
         self.obj["inplace_matmul"] = self.dumps(inplace_matmul)
@@ -1064,22 +1111,20 @@ class Test(helper.PickleTestDump):
         self.obj["inplace_or"] = self.dumps(inplace_or)
 
     def test_op_getlen(self):
-        self.obj["f"] = self.dumps(getlen)
+        self.obj["getlen"] = self.dumps(getlen)
 
     def test_op_match(self):
         self.obj["match_mapping"] = self.dumps(match_mapping)
-        self.obj["match_seq"] = self.dumps(match_sequence)
+        self.obj["match_sequence"] = self.dumps(match_sequence)
         self.obj["match_keys"] = self.dumps(match_keys)
         self.obj["match_class"] = self.dumps(match_class)
 
     def test_op_copy_dict_no_keys(self):
-        self.obj["f"] = self.dumps(copy_dict_without_keys)
+        self.obj["copy_dict_without_keys"] = self.dumps(copy_dict_without_keys)
 
-    def test_op_exc(self):
-        self.obj["push_exc"] = self.dumps(push_exc_info)
-        self.obj["check_exc"] = self.dumps(check_exc_match)
-
-    def test_op_eg_match(self):
+    def test_op_except(self):
+        self.obj["push_exc_info"] = self.dumps(push_exc_info)
+        self.obj["check_exc_match"] = self.dumps(check_exc_match)
         self.obj["check_eg_match"] = self.dumps(check_eg_match)
 
     def test_op_context_except(self):
@@ -1092,12 +1137,14 @@ class Test(helper.PickleTestDump):
         self.obj["end_async_for"] = self.dumps(end_async_for)
         self.obj["setup_async_with"] = self.dumps(setup_async_with)
 
-    def test_op_context(self):
+    def test_op_context_with(self):
         self.obj["before_with"] = self.dumps(before_with)
+        self.obj["setup_with"] = self.dumps(setup_with)
+
+    def test_op_context_finally(self):
         self.obj["begin_finally"] = self.dumps(begin_finally)
         self.obj["end_finally"] = self.dumps(end_finally)
         self.obj["setup_finally"] = self.dumps(setup_finally)
-        self.obj["setup_with"] = self.dumps(setup_with)
 
     def test_op_async(self):
         self.obj["yield_from"] = self.dumps(yield_from)
@@ -1123,15 +1170,21 @@ class Test(helper.PickleTestDump):
         self.obj["list_extend"] = self.dumps(list_extend)
 
     def test_op_pop_block(self):
-        self.obj["f"] = self.dumps(pop_block)
+        self.obj["pop_block"] = self.dumps(pop_block)
 
     def test_op_async_gen_wrap(self):
-        self.obj["f"] = self.dumps(async_gen_wrap)
+        self.obj["async_gen_wrap"] = self.dumps(async_gen_wrap)
+
+    def test_op_rotN(self):
+        self.obj["rot_n"] = self.dumps(rot_n)
+
+    def test_op_swap(self):
+        self.obj["swap"] = self.dumps(swap)
 
     def test_op_jump(self):
         self.obj["jump_abs"] = self.dumps(jump_abs)
-        self.obj["pop_jump_if_else"] = self.dumps(pop_jump_if_else)
-        self.obj["pop_jump_forward_if_else"] = self.dumps(pop_jump_forward_if_else)
+        self.obj["pop_jump_if_false"] = self.dumps(pop_jump_if_false)
+        self.obj["pop_jump_forward_if_false"] = self.dumps(pop_jump_forward_if_false)
         self.obj["pop_jump_if_true"] = self.dumps(pop_jump_if_true)
         self.obj["pop_jump_forward_if_true"] = self.dumps(pop_jump_forward_if_true)
         self.obj["jump_if_not_exc_match"] = self.dumps(jump_if_not_exc_match)
@@ -1150,13 +1203,13 @@ class Test(helper.PickleTestDump):
         self.obj["bin_op"] = self.dumps(bin_op)
 
     def test_op_copy(self):
-        self.obj["f"] = self.dumps(copy)
+        self.obj["copy"] = self.dumps(copy)
 
     def test_op_send(self):
-        self.obj["f"] = self.dumps(send)
+        self.obj["send"] = self.dumps(send)
 
     def test_op_gen_start(self):
-        self.obj["f"] = self.dumps(gen_start)
+        self.obj["gen_start"] = self.dumps(gen_start)
 
     def test_op_call(self):
         self.obj["call_func"] = self.dumps(call_func)
@@ -1168,11 +1221,17 @@ class Test(helper.PickleTestDump):
 
     def test_op_closure(self):
         self.obj["load_closure"] = self.dumps(load_closure)
+        self.obj["load_closure_f"] = self.dumps(load_closure(5))
         self.obj["make_cell"] = self.dumps(make_cell)
+        self.obj["make_cell_f"] = self.dumps(make_cell(5))
         self.obj["load_deref"] = self.dumps(load_deref)
+        self.obj["load_deref_f"] = self.dumps(load_deref(5))
         self.obj["store_deref"] = self.dumps(store_deref)
+        self.obj["store_deref_f"] = self.dumps(store_deref(5))
         self.obj["delete_deref"] = self.dumps(delete_deref)
+        self.obj["delete_deref_f"] = self.dumps(delete_deref(5))
         self.obj["copy_free_vars"] = self.dumps(copy_free_vars)
+        self.obj["copy_free_vars_f"] = self.dumps(copy_free_vars([1,2,3]))
         
     def test_op_unpack(self):
         self.obj["build_list_unpack"] = self.dumps(build_list_unpack)
