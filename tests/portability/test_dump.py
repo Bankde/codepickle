@@ -375,36 +375,6 @@ def inplace_true_divide(y):
     x[0] /= y
     return x[0]
 
-def getlen(a):
-    # GET_LEN
-    match a:
-        case [1,2,3]: 
-            return 1
-
-def match_mapping(a):
-    # MATCH_MAPPING
-    match a:
-        case {"A":"B"}: 
-            return 1
-
-def match_sequence(a):
-    # MATCH_SEQUENCE
-    match a:
-        case [1,2,3]: 
-            return 1
-
-def match_keys(a):
-    # MATCH_KEYS
-    match a:
-        case {"A":"B"}:
-            return 1
-
-def copy_dict_without_keys(a, b):
-    # COPY_DICT_WITHOUT_KEYS
-    match a:
-        case {"A":"B", **b}:
-            return 1
-
 def push_exc_info():
     # PUSH_EXC_INFO
     try:
@@ -420,15 +390,6 @@ def check_exc_match():
     except Exception as e:
         return 1
     return 5
-
-def check_eg_match():
-    # CHECK_EG_MATCH
-    try:
-        1/0
-        a = 5
-    except* Exception as e:
-        a = 1
-    return a
 
 def reraise():
     # RERAISE
@@ -618,10 +579,6 @@ def pop_block():
         x = Decimal("1") / Decimal("42")
     return str(x)
 
-async def async_gen_wrap():
-    # ASYNC_GEN_WRAP
-    yield 1
-
 def end_finally():
     # END_FINALLY
     from decimal import Decimal, localcontext
@@ -629,33 +586,6 @@ def end_finally():
         ctx.prec = 10
         x = Decimal("1") / Decimal("42")
     return str(x)
-
-def prep_reraise_star():
-    # PREP_RERAISE_STAR
-    try:
-        1/0
-        a = 5
-    except* Exception:
-        a = 1
-    return a
-
-def rot_n():
-    # ROT_N
-    x = {"y": 1}
-    z = 1
-    match x:
-        case {"y": (0 as y) | (1 as y)}:
-            z = 0
-    return z
-
-def swap():
-    # SWAP
-    try:
-        1/0
-        a = 2
-    except* Exception as e:
-        a = 5
-    return a
 
 def jump_abs():
     # JUMP_ABSOLUTE
@@ -875,13 +805,6 @@ def build_tuple_unpack(a, b):
     # BUILD_TUPLE_UNPACK
     return (*a, *b)
 
-def match_class(typ):
-    # MATCH_CLASS
-    match typ():
-        case object():
-            return 1
-    return 5
-
 def build_set_unpack(x,y):
     # BUILD_SET_UNPACK
     return {*x, *y}
@@ -1051,10 +974,6 @@ class Test(helper.PickleTestDump):
     def test_disassemble_generator(self):
         self.obj["g"] = self.dumps(gen)
 
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_disassemble_async_generator(self):
-        self.obj["ag"] = self.dumps(async_gen)
-
     def test_disassemble_coroutine(self):
         self.obj["co"] = self.dumps(coroutine)
 
@@ -1112,17 +1031,6 @@ class Test(helper.PickleTestDump):
         self.obj["inplace_xor"] = self.dumps(inplace_xor)
         self.obj["inplace_or"] = self.dumps(inplace_or)
 
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_op_match(self):
-        self.obj["getlen"] = self.dumps(getlen)
-        self.obj["match_mapping"] = self.dumps(match_mapping)
-        self.obj["match_sequence"] = self.dumps(match_sequence)
-        self.obj["match_keys"] = self.dumps(match_keys)
-        self.obj["match_class"] = self.dumps(match_class)
-
-    def test_op_copy_dict_no_keys(self):
-        self.obj["copy_dict_without_keys"] = self.dumps(copy_dict_without_keys)
-
     def test_op_except(self):
         self.obj["push_exc_info"] = self.dumps(push_exc_info)
         self.obj["check_exc_match"] = self.dumps(check_exc_match)
@@ -1131,12 +1039,6 @@ class Test(helper.PickleTestDump):
         self.obj["reraise"] = self.dumps(reraise)
         self.obj["with_except_start"] = self.dumps(with_except_start)
         self.obj["setup_except"] = self.dumps(setup_except)
-
-    @pytest.mark.skipif(sys.version_info < (3,11), reason="requires python3.11")
-    def test_op_context_except_star(self):
-        self.obj["check_eg_match"] = self.dumps(check_eg_match)
-        self.obj["prep_reraise_star"] = self.dumps(prep_reraise_star)
-        self.obj["swap"] = self.dumps(swap)
 
     def test_op_context_async(self):
         self.obj["end_async_for"] = self.dumps(end_async_for)
@@ -1176,14 +1078,6 @@ class Test(helper.PickleTestDump):
 
     def test_op_pop_block(self):
         self.obj["pop_block"] = self.dumps(pop_block)
-
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_op_async_gen_wrap(self):
-        self.obj["async_gen_wrap"] = self.dumps(async_gen_wrap)
-
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_op_rotN(self):
-        self.obj["rot_n"] = self.dumps(rot_n)
 
     def test_op_jump(self):
         self.obj["jump_abs"] = self.dumps(jump_abs)

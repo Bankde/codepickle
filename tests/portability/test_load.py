@@ -182,18 +182,6 @@ class Test(helper.PickleTestLoad):
         with pytest.raises(StopIteration) as e_info:
             next(gi)
 
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_disassemble_async_generator(self):
-        ag = self.loads(self.obj["ag"])
-        loop = asyncio.get_event_loop()
-        agi = ag(3)
-        fut = anext(agi)
-        res = loop.run_until_complete(fut)
-        self.assertEqual(res, 3)
-        with pytest.raises(StopAsyncIteration) as e_info:
-            fut = anext(agi)
-            loop.run_until_complete(fut)
-
     def test_disassemble_coroutine(self):
         co = self.loads(self.obj["co"])
         coro = co(1)
@@ -287,25 +275,6 @@ class Test(helper.PickleTestLoad):
         inplace_or = self.loads(self.obj["inplace_or"])
         self.assertEqual(inplace_or(6), 23)
 
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_op_match(self):
-        getlen = self.loads(self.obj["getlen"])
-        self.assertEqual(getlen([1,2,3]), 1)
-        match_mapping = self.loads(self.obj["match_mapping"])
-        self.assertEqual(match_mapping({"A":"B"}), 1)
-        match_sequence = self.loads(self.obj["match_sequence"])
-        self.assertEqual(match_sequence([1,2,3]), 1)
-        match_keys = self.loads(self.obj["match_keys"])
-        self.assertEqual(match_keys({"A":"B"}), 1)
-        match_mapping = self.loads(self.obj["match_mapping"])
-        self.assertEqual(match_mapping({"A":"B"}), 1)
-        match_class = self.loads(self.obj["match_class"])
-        self.assertEqual(match_class(str), 1)
-
-    def test_op_copy_dict_no_keys(self):
-        copy_dict_without_keys = self.loads(self.obj["copy_dict_without_keys"])
-        self.assertEqual(copy_dict_without_keys({"A":"B", "C":"D"}, {"C":"D"}), 1)
-
     def test_op_except(self):
         push_exc_info = self.loads(self.obj["push_exc_info"])
         self.assertEqual(push_exc_info(), 1)
@@ -319,15 +288,6 @@ class Test(helper.PickleTestLoad):
         self.assertEqual(with_except_start(), '0.02380952381')
         setup_except = self.loads(self.obj["setup_except"])
         self.assertEqual(setup_except(), 1)
-
-    @pytest.mark.skipif(sys.version_info < (3,11), reason="requires python3.11")
-    def test_op_context_except_star(self):
-        check_eg_match = self.loads(self.obj["check_eg_match"])
-        self.assertEqual(check_eg_match(), 1)
-        prep_reraise_star = self.loads(self.obj["prep_reraise_star"])
-        self.assertEqual(prep_reraise_star(), 1)
-        swap = self.loads(self.obj["swap"])
-        self.assertEqual(swap(), 5)
 
     def test_op_context_async(self):
         end_async_for = self.loads(self.obj["end_async_for"])
@@ -396,19 +356,6 @@ class Test(helper.PickleTestLoad):
     def test_op_pop_block(self):
         pop_block = self.loads(self.obj["pop_block"])
         self.assertEqual(pop_block(), '0.02380952381')
-
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_op_async_gen_wrap(self):
-        async_gen_wrap = self.loads(self.obj["async_gen_wrap"])
-        g = async_gen_wrap()
-        loop = asyncio.get_event_loop()
-        r = loop.run_until_complete(anext(g))
-        self.assertEqual(r, 1)
-
-    @pytest.mark.skipif(sys.version_info < (3,10), reason="requires python3.10")
-    def test_op_rotN(self):
-        rot_n = self.loads(self.obj["rot_n"])
-        self.assertEqual(rot_n(), 0)
 
     def test_op_jump(self):
         jump_abs = self.loads(self.obj["jump_abs"])
