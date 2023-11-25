@@ -306,6 +306,12 @@ def rotTwoThree():
     c,b,a = a,b,c
     return a,b,c
 
+def pushNull(a):
+    try:
+        1/0
+    except:
+        return a()
+
 def dup():
     # DUP_TOP
     a,b,c = 1,2,3
@@ -997,6 +1003,9 @@ class Test(helper.PickleTestDump):
         '''
         self.obj["rot"] = self.dumps(rotTwoThree)
 
+    def test_op_push_null(self):
+        self.obj["pushNull"] = self.dumps(pushNull)
+    
     def test_op_dup(self):
         self.obj["dupTop"] = self.dumps(dup)
         self.obj["dupTopTwo"] = self.dumps(dupTopTwo)

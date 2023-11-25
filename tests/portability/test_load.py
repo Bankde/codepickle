@@ -211,6 +211,10 @@ class Test(helper.PickleTestLoad):
         rot = self.loads(self.obj["rot"])
         self.assertTupleEqual(rot(), (3,2,1))
 
+    def test_op_push_null(self):
+        pushNull = self.loads(self.obj["pushNull"])
+        self.assertEqual(pushNull(dummy_function), 2)
+
     def test_op_dup(self):
         dupTop = self.loads(self.obj["dupTop"])
         self.assertEqual(dupTop(), 1)
